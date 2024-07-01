@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fabricated Image Analyzer</title>
+    <style>
+        body {
+            background-image: url('static\\future-technology-connection-background-free-vector.jpg');
+            background-size: 160%;
+            background-position: center;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        #resultContainer {
+            font-size: 24px;
+            /* Adjust the font size as needed */
+        }
+        
+        .prediction {
+            font-size: 28px;
+            /* Adjust the font size as needed */
+            font-weight: bold;
+            /* Optionally adjust font weight */
+        }
+        
+        .confidence {
+            font-size: 22px;
+            /* Adjust the font size as needed */
+            font-style: italic;
+            /* Optionally adjust font style */
+        }
+    </style>
+</head>
+
+<body>
+
+    <center>
+        <h1>Image Analysis</h1>
+        <input type="file" id="fileInput" accept=".png, .jpg, .jpeg" multiple>
+        <button onclick="analyzeImage()">Analyze</button>
+        <div id="resultContainer"></div>
+
+        <h2>Selected Image</h2>
+        <img id="selectedImage" style="max-width: 500px; max-height: 500px;">
+    </center>
+
+    <h2>EXIF Image</h2>
+    <form action="/upload_exif" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required>
+        <input type="submit" value="Details">
+    </form>
+
+    <h2>ELA Analysis</h2>
+    <form action="/analyze_ela" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept="image/*" required>
+        <input type="submit" value="Analyze_ela">
+
+        <script>
+            function analyzeImage() {
+                var xhr = new XMLHttpRequest();
+                xhr.open("POST", "/analyze", true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        var response = JSON.parse(xhr.responseText);
+                        if (response.status === "success") {
+                            document.getElementById("resultContainer").innerHTML = "<p>" + response.message + "</p>";
+                        } else {
+                            alert("Error: " + response.message);
+                        }
+                    }
+                };
+                var formData = new FormData();
+                var fileInput = document.getElementById("fileInput");
+                for (var i = 0; i < fileInput.files.length; i++) {
+                    formData.append('file', fileInput.files[i]);
+                    // Display selected image
+                    var reader = new FileReader();
+                    reader.onload = function(event) {
+                        var img = document.getElementById("selectedImage");
+                        img.src = event.target.result;
+                    };
+                    reader.readAsDataURL(fileInput.files[i]);
+                }
+                xhr.send(formData);
+            }
+        </script>
+</body>
+
+</html>
